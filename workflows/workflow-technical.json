@@ -1,0 +1,393 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Nghiệp Vụ 1: Mua Sắm Vật Tư Kỹ Thuật & Dịch Vụ Bảo Dưỡng",
+    "subtitle": "Quy trình theo sự vụ: BM thẩm định kỹ thuật, Cung ứng chọn Xuất kho / Mua mới / Tách kho (Miễn duyệt BOD nếu 100% xuất kho), BOD ký số, Trừ thẻ kho & Nghiệm thu",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "standard",
+    "output": ".archify/three-workflows-20261102/technical.html"
+  },
+  "lanes": [
+    {
+      "id": "requester",
+      "label": "1. Người đề xuất (Tòa nhà)"
+    },
+    {
+      "id": "operations",
+      "label": "2. Quản lý Vận hành / BM"
+    },
+    {
+      "id": "supply",
+      "label": "3. Ban Cung ứng & Ngân sách"
+    },
+    {
+      "id": "warehouse",
+      "label": "4. Kho Tổng Kỹ Thuật"
+    },
+    {
+      "id": "leadership",
+      "label": "5. Ban Giám đốc (BOD)"
+    },
+    {
+      "id": "exceptions",
+      "label": "6. Rẽ nhánh & Ngoại lệ",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p_intake",
+      "label": "1. Khởi tạo & Thẩm định",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "p_procure",
+      "label": "2. Cân đối nguồn cung & Phê duyệt",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "p_fulfill",
+      "label": "3. Đặt hàng & Nghiệm thu",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "grp_site",
+      "label": "Kiểm soát kỹ thuật cấp cơ sở",
+      "lane": "operations",
+      "fromCol": 1,
+      "toCol": 1,
+      "variant": "emphasis"
+    },
+    {
+      "id": "grp_supply",
+      "label": "Cân đối nguồn cung (Kho vs Mua mới)",
+      "lane": "supply",
+      "fromCol": 2,
+      "toCol": 4,
+      "variant": "emphasis"
+    },
+    {
+      "id": "grp_exceptions",
+      "label": "Hành lang rẽ nhánh & xử lý ngoại lệ",
+      "lane": "exceptions",
+      "fromCol": 0,
+      "toCol": 5,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "commit_req",
+    "bm_review",
+    "supply_balance",
+    "bod_approval",
+    "supply_order",
+    "site_delivery",
+    "invoice_close"
+  ],
+  "nodes": [
+    {
+      "id": "commit_req",
+      "lane": "requester",
+      "col": 0,
+      "type": "frontend",
+      "icon": "person",
+      "label": "Tạo Đề Xuất Kỹ Thuật",
+      "sublabel": "Nhập quy cách, ảnh & số lượng",
+      "tag": "DRAFT -> SUBMITTED",
+      "width": 190
+    },
+    {
+      "id": "bm_review",
+      "lane": "operations",
+      "col": 1,
+      "type": "security",
+      "icon": "decision",
+      "label": "BM Thẩm Định Kỹ Thuật",
+      "sublabel": "Duyệt quy cách & chốt số lượng",
+      "tag": "UNDER_REVIEW",
+      "width": 190
+    },
+    {
+      "id": "bm_reject",
+      "lane": "exceptions",
+      "col": 1,
+      "type": "external",
+      "icon": "failure",
+      "label": "BM Từ Chối Mặt Hàng",
+      "sublabel": "Bác bỏ dòng không phù hợp",
+      "tag": "POLICY_REJECTED",
+      "width": 190
+    },
+    {
+      "id": "wh_check",
+      "lane": "warehouse",
+      "col": 2,
+      "type": "database",
+      "icon": "database",
+      "label": "Tra Cứu Tồn Kho Khả Dụng",
+      "sublabel": "Tra cứu tồn khả dụng kho tổng",
+      "tag": "WAREHOUSE_PICKER",
+      "width": 190
+    },
+    {
+      "id": "supply_balance",
+      "lane": "supply",
+      "col": 2,
+      "type": "backend",
+      "icon": "briefcase",
+      "label": "Chọn Nguồn Cung Ứng",
+      "sublabel": "Xuất kho / Mua mới / Tách kho",
+      "tag": "SELECTED_OPTION",
+      "width": 190
+    },
+    {
+      "id": "bypass_bod",
+      "lane": "supply",
+      "col": 3,
+      "type": "messagebus",
+      "icon": "start",
+      "label": "Miễn Phê Duyệt Chi Phí",
+      "sublabel": "100% xuất kho -> Miễn duyệt BOD",
+      "tag": "BYPASS_BOD",
+      "width": 190
+    },
+    {
+      "id": "bod_approval",
+      "lane": "leadership",
+      "col": 3,
+      "type": "security",
+      "icon": "flag",
+      "label": "BOD Ký Số Phê Duyệt",
+      "sublabel": "Duyệt ngân sách phần mua mới",
+      "tag": "AWAITING_APPROVAL",
+      "width": 190
+    },
+    {
+      "id": "bod_adjust",
+      "lane": "exceptions",
+      "col": 3,
+      "type": "external",
+      "icon": "failure",
+      "label": "BOD Yêu Cầu Sửa Đổi",
+      "sublabel": "Yêu cầu đổi NCC hoặc giảm giá",
+      "tag": "REJECTED_COST",
+      "width": 190
+    },
+    {
+      "id": "supply_order",
+      "lane": "supply",
+      "col": 4,
+      "type": "cloud",
+      "icon": "external",
+      "label": "Đặt Hàng & Điều Phối Xuất",
+      "sublabel": "Gửi PO NCC & lập lịch giao tòa",
+      "tag": "ORDERING",
+      "width": 190
+    },
+    {
+      "id": "wh_dispatch",
+      "lane": "warehouse",
+      "col": 4,
+      "type": "database",
+      "icon": "database",
+      "label": "Trừ Thẻ Kho Xuất (OUT)",
+      "sublabel": "Trừ tồn kho & lập phiếu xuất",
+      "tag": "DISPATCH_SITE",
+      "width": 190
+    },
+    {
+      "id": "site_delivery",
+      "lane": "operations",
+      "col": 5,
+      "type": "frontend",
+      "icon": "success",
+      "label": "Kiểm Nhận & Nghiệm Thu",
+      "sublabel": "Kiểm tra thực tế & ký nhận Đạt",
+      "tag": "ACCEPTED",
+      "width": 190
+    },
+    {
+      "id": "accept_failed",
+      "lane": "exceptions",
+      "col": 5,
+      "type": "external",
+      "icon": "failure",
+      "label": "Nghiệm Thu Lỗi (FAILED)",
+      "sublabel": "Lập biên bản lỗi & chờ giao bù",
+      "tag": "RETRY_DELIVERY",
+      "width": 190
+    },
+    {
+      "id": "invoice_close",
+      "lane": "supply",
+      "col": 5,
+      "type": "database",
+      "icon": "database",
+      "label": "Khớp HĐ VAT & Hoàn Tất",
+      "sublabel": "Khớp HĐ VAT & lưu Lark Drive",
+      "tag": "COMPLETED",
+      "width": 190
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_submit",
+      "from": "commit_req",
+      "to": "bm_review",
+      "label": "Nộp đề xuất (SUBMITTED)",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_bm_approve",
+      "from": "bm_review",
+      "to": "supply_balance",
+      "label": "Duyệt số lượng (REVIEWED)",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_bm_reject",
+      "from": "bm_review",
+      "to": "bm_reject",
+      "label": "Từ chối (REJECTED)",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_wh_check",
+      "from": "wh_check",
+      "to": "supply_balance",
+      "label": "Tồn kho khả dụng",
+      "variant": "dashed",
+      "role": "async"
+    },
+    {
+      "id": "e_cost_submit",
+      "from": "supply_balance",
+      "to": "bod_approval",
+      "label": "Có mua mới -> Trình BOD",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_bypass_bod",
+      "from": "supply_balance",
+      "to": "bypass_bod",
+      "label": "100% xuất kho",
+      "variant": "default",
+      "role": "branch"
+    },
+    {
+      "id": "e_bypass_order",
+      "from": "bypass_bod",
+      "to": "supply_order",
+      "label": "Miễn duyệt chi phí",
+      "variant": "default",
+      "role": "branch"
+    },
+    {
+      "id": "e_bod_reject",
+      "from": "bod_approval",
+      "to": "bod_adjust",
+      "label": "Bác bỏ / Yêu cầu sửa",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_bod_return",
+      "from": "bod_adjust",
+      "to": "supply_balance",
+      "label": "Làm lại phương án",
+      "variant": "dashed",
+      "role": "return"
+    },
+    {
+      "id": "e_bod_approve",
+      "from": "bod_approval",
+      "to": "supply_order",
+      "label": "Ký số phê duyệt (APPROVED)",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_order_dispatch",
+      "from": "supply_order",
+      "to": "wh_dispatch",
+      "label": "Lệnh trừ kho (DISPATCH)",
+      "variant": "dashed",
+      "role": "async"
+    },
+    {
+      "id": "e_order_deliver",
+      "from": "supply_order",
+      "to": "site_delivery",
+      "label": "Giao hàng tới tòa nhà",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_accept_failed",
+      "from": "site_delivery",
+      "to": "accept_failed",
+      "label": "Nghiệm thu lỗi (FAILED)",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_retry_delivery",
+      "from": "accept_failed",
+      "to": "supply_order",
+      "label": "Giao bù / Đổi trả",
+      "variant": "dashed",
+      "role": "return"
+    },
+    {
+      "id": "e_accept_pass",
+      "from": "site_delivery",
+      "to": "invoice_close",
+      "label": "Nghiệm thu Đạt (PASSED)",
+      "variant": "emphasis",
+      "role": "main"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Bước 03: Lựa Chọn Nguồn Cung Ứng",
+      "items": [
+        "Xuất kho tổng (INVENTORY): Trích hàng từ kho tổng kỹ thuật nếu tồn kho khả dụng còn đủ",
+        "Mua mới (PURCHASE): Chào giá NCC, tính thuế VAT, bắt buộc chuyển sang Bước 04 trình BOD duyệt",
+        "Tách kho & Mua (SPLIT): Một phần lấy từ tồn kho tổng + Phần còn thiếu mua mới từ NCC",
+        "Từ chối mặt hàng (REJECT): Bác bỏ dòng không cần thiết, tồn còn đủ hoặc vượt ngân sách"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Cơ Chế Miễn Phê Duyệt Chi Phí (Bypass BOD)",
+      "items": [
+        "Nếu 100% mặt hàng được chọn Xuất kho tổng (không phát sinh mua mới từ NCC)",
+        "Hệ thống tự động MIỄN DUYỆT CHI PHÍ, chuyển thẳng sang Bước Đặt hàng & Điều phối xuất kho",
+        "Giúp rút ngắn thời gian xử lý sự cố khẩn cấp tại tòa nhà khi kho tổng đã có sẵn hàng"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Trừ Thẻ Kho & Nghiệm Thu Cơ Sở",
+      "items": [
+        "Khi xác nhận điều phối: Tự động trừ currentStock và ghi thẻ kho OUT (reference: DISPATCH_TO_SITE)",
+        "Tòa nhà nhận hàng (từ kho tổng hoặc từ NCC), chụp ảnh biên bản và ký nghiệm thu đạt (PASSED)",
+        "Phần mua mới từ NCC sẽ được đối soát và đưa vào Hóa đơn tài chính VAT tương ứng"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Nghiệp Vụ 2: Mua Sắm Định Kỳ Văn Phòng Phẩm (VPP)",
+    "subtitle": "Quy trình gom lô tháng: Bỏ qua duyệt BM, cân đối kho tổng Head Office, đặt NCC Hồng Hà & cấp phát 2 chặng về 8 tòa",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "standard",
+    "output": ".archify/three-workflows-20261102/stationery.html"
+  },
+  "lanes": [
+    { "id": "sites", "label": "1. 8 Tòa nhà & 4 Ban Head Office" },
+    { "id": "supply", "label": "2. Ban Cung ứng & Ngân sách" },
+    { "id": "warehouse", "label": "3. Kho Tổng Head Office" },
+    { "id": "leadership", "label": "4. Ban Giám đốc (BOD)" },
+    { "id": "exceptions", "label": "5. Rẽ nhánh & Ngoại lệ", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "p_intake", "label": "1. Đề xuất & Rà soát gom lô", "fromCol": 0, "toCol": 1 },
+    { "id": "p_balance", "label": "2. Cân đối tồn & Ký số duyệt", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "p_dispatch", "label": "3. Nhập kho & Cấp phát 2 chặng", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "grp_supply", "label": "Rà soát gom lô & Đặt mua tập trung", "lane": "supply", "fromCol": 1, "toCol": 4, "variant": "emphasis" },
+    { "id": "grp_wh", "label": "Vận hành kho tổng 2 chặng", "lane": "warehouse", "fromCol": 2, "toCol": 5, "variant": "emphasis" },
+    { "id": "grp_exp", "label": "Hành lang điều chỉnh & xử lý lỗi", "lane": "exceptions", "fromCol": 0, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": [
+    "vpp_submit",
+    "vpp_review",
+    "wh_balance",
+    "vpp_approve",
+    "vpp_order",
+    "wh_flow",
+    "vpp_complete"
+  ],
+  "nodes": [
+    {
+      "id": "vpp_submit",
+      "lane": "sites",
+      "col": 0,
+      "type": "frontend",
+      "icon": "calendar",
+      "label": "Nộp Checklist VPP Tháng",
+      "sublabel": "Gom lô tháng / Bỏ qua duyệt BM tòa",
+      "tag": "UNDER_REVIEW",
+      "width": 190
+    },
+    {
+      "id": "vpp_draft",
+      "lane": "exceptions",
+      "col": 0,
+      "type": "database",
+      "icon": "neutral",
+      "label": "Lưu Nháp / Điều Chỉnh",
+      "sublabel": "Sửa số lượng trước khi chốt kỳ nộp",
+      "tag": "DRAFT",
+      "width": 190
+    },
+    {
+      "id": "vpp_review",
+      "lane": "supply",
+      "col": 1,
+      "type": "backend",
+      "icon": "active",
+      "label": "Cung Ứng Rà Soát Gom Lô",
+      "sublabel": "Tổng hợp nhu cầu 8 tòa & 4 ban HO",
+      "tag": "CONSOLIDATE",
+      "width": 190
+    },
+    {
+      "id": "wh_balance",
+      "lane": "warehouse",
+      "col": 2,
+      "type": "database",
+      "icon": "database",
+      "label": "Cân Đối Tồn Kho Tổng",
+      "sublabel": "Tách: lấy từ kho vs đặt mua mới",
+      "tag": "STOCK_BALANCE",
+      "width": 190
+    },
+    {
+      "id": "vpp_approve",
+      "lane": "leadership",
+      "col": 3,
+      "type": "security",
+      "icon": "flag",
+      "label": "BOD Ký Số Phê Duyệt",
+      "sublabel": "Ký số dự toán gom lô cả công ty",
+      "tag": "APPROVED",
+      "width": 190
+    },
+    {
+      "id": "vpp_reject",
+      "lane": "exceptions",
+      "col": 3,
+      "type": "external",
+      "icon": "failure",
+      "label": "Yêu Cầu Cân Đối Lại",
+      "sublabel": "Cắt giảm danh mục hoặc số lượng",
+      "tag": "RECALL",
+      "width": 190
+    },
+    {
+      "id": "vpp_order",
+      "lane": "supply",
+      "col": 4,
+      "type": "cloud",
+      "icon": "external",
+      "label": "Đặt Hàng NCC Hồng Hà",
+      "sublabel": "Khóa cố định NCC Hồng Hà, VAT 10%",
+      "tag": "ORDERING",
+      "width": 190
+    },
+    {
+      "id": "wh_flow",
+      "lane": "warehouse",
+      "col": 5,
+      "type": "messagebus",
+      "icon": "start",
+      "label": "Nhập Kho & Cấp Phát",
+      "sublabel": "RECEIVE về kho -> DISPATCH 8 tòa",
+      "tag": "LOGISTICS_2_PHASE",
+      "width": 190
+    },
+    {
+      "id": "vpp_complete",
+      "lane": "sites",
+      "col": 5,
+      "type": "frontend",
+      "icon": "success",
+      "label": "8 Tòa Nhận Hàng Hoàn Tất",
+      "sublabel": "Tòa nhận đủ hàng, trừ hết thẻ kho",
+      "tag": "COMPLETED",
+      "width": 190
+    },
+    {
+      "id": "vpp_invoice",
+      "lane": "supply",
+      "col": 5,
+      "type": "database",
+      "icon": "database",
+      "label": "1 HĐ VAT Head Office",
+      "sublabel": "Xuất 1 hóa đơn VAT WeLegacy & lưu trữ",
+      "tag": "VAT_10%",
+      "width": 190
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_vpp_draft",
+      "from": "vpp_submit",
+      "to": "vpp_draft",
+      "label": "Chưa hoàn tất",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "e_vpp_submit",
+      "from": "vpp_submit",
+      "to": "vpp_review",
+      "label": "Gửi đề xuất tháng",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_vpp_balance",
+      "from": "vpp_review",
+      "to": "wh_balance",
+      "label": "Đối chiếu tồn tổng",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_vpp_approve",
+      "from": "wh_balance",
+      "to": "vpp_approve",
+      "label": "Trình ký số dự toán",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_vpp_reject",
+      "from": "vpp_approve",
+      "to": "vpp_reject",
+      "label": "Từ chối / Yêu cầu sửa",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_vpp_return",
+      "from": "vpp_reject",
+      "to": "vpp_review",
+      "label": "Mở lại rà soát (Recall)",
+      "variant": "dashed",
+      "role": "return"
+    },
+    {
+      "id": "e_vpp_order",
+      "from": "vpp_approve",
+      "to": "vpp_order",
+      "label": "Ký duyệt (APPROVED)",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_wh_receive",
+      "from": "vpp_order",
+      "to": "wh_flow",
+      "label": "Giao hàng về kho tổng",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_wh_dispatch",
+      "from": "wh_flow",
+      "to": "vpp_complete",
+      "label": "Xuất kho cấp phát 8 tòa",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_vpp_invoice",
+      "from": "wh_flow",
+      "to": "vpp_invoice",
+      "label": "Khớp hóa đơn Hồng Hà",
+      "variant": "default",
+      "role": "async"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Gom Lô Định Kỳ Tháng",
+      "items": [
+        "8 tòa nhà + 4 phòng ban Trụ sở chính nộp checklist",
+        "Bỏ qua khâu BM duyệt, đi thẳng vào Cung ứng gom lô",
+        "Một đợt mua sắm duy nhất phục vụ cả công ty trong tháng"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Mô Hình Kho Tổng 2 Chặng",
+      "items": [
+        "Chặng 1: NCC Hồng Hà giao toàn bộ hàng về Kho Head Office (RECEIVE_STOCK)",
+        "Chặng 2: Cung ứng mở phiếu xuất kho cấp phát dần về 8 tòa (DISPATCH_SITE)",
+        "Tách rõ nguồn: 'Lấy từ kho sẵn có' vs 'Đặt mua mới NCC'"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Nhà Cung Cấp & Pháp Nhân Hóa Đơn",
+      "items": [
+        "Cố định 1 NCC chiến lược: Công ty CP Văn phòng phẩm Hồng Hà",
+        "Thuế suất VAT cố định: 10%",
+        "Trụ sở chính xuất 1 hóa đơn VAT cho CP Đầu tư WeLegacy Operations"
+      ]
+    }
+  ]
+}

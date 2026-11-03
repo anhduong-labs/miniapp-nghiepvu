@@ -1,0 +1,280 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Nghiệp Vụ 3: Mua Sắm Định Kỳ Vật Tư Tiêu Hao (VTTH)",
+    "subtitle": "Quy trình kiểm soát định mức: 18 mặt hàng qua 8 tòa nhà, cảnh báo lệch 2 tháng, ma trận 18x8, khóa sổ cứng & giao thẳng",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "standard",
+    "output": ".archify/three-workflows-20261102/consumables.html"
+  },
+  "lanes": [
+    { "id": "sites", "label": "1. 8 Tòa nhà (Cơ sở đề xuất)" },
+    { "id": "quota", "label": "2. Kiểm soát Định mức Thông minh" },
+    { "id": "supply", "label": "3. Ban Cung ứng & Ngân sách" },
+    { "id": "leadership", "label": "4. Ban Giám đốc (BOD)" },
+    { "id": "exceptions", "label": "5. Rẽ nhánh & Khóa sổ cứng", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "p_intake", "label": "1. Đề xuất 18 món & Định mức", "fromCol": 0, "toCol": 1 },
+    { "id": "p_matrix", "label": "2. Ma trận 18x8 & Khóa sổ", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "p_direct", "label": "3. Giao thẳng 8 tòa & Thẻ kho", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "grp_quota", "label": "Thuật toán kiểm soát định mức 2 tháng", "lane": "quota", "fromCol": 0, "toCol": 1, "variant": "emphasis" },
+    { "id": "grp_supply", "label": "Ma trận tổng quan & Điều phối", "lane": "supply", "fromCol": 2, "toCol": 4, "variant": "emphasis" },
+    { "id": "grp_exp", "label": "Khóa sổ cứng & Xử lý ngoại lệ", "lane": "exceptions", "fromCol": 0, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": [
+    "vtth_submit",
+    "quota_calc",
+    "matrix_review",
+    "bod_sign",
+    "vtth_order",
+    "direct_delivery",
+    "site_receive"
+  ],
+  "nodes": [
+    {
+      "id": "vtth_submit",
+      "lane": "sites",
+      "col": 0,
+      "type": "frontend",
+      "icon": "active",
+      "label": "Nộp 18 Mặt Hàng Tiêu Chuẩn",
+      "sublabel": "Nước lau sàn, rửa tay, túi rác, giấy...",
+      "tag": "18_ITEMS",
+      "width": 190
+    },
+    {
+      "id": "quota_calc",
+      "lane": "quota",
+      "col": 1,
+      "type": "backend",
+      "icon": "clock",
+      "label": "So Sánh Lịch Sử 2 Tháng",
+      "sublabel": "Đối chiếu xuất T-1, T-2 & đặt T-1, T-2",
+      "tag": "HISTORICAL_AVG",
+      "width": 190
+    },
+    {
+      "id": "quota_warn",
+      "lane": "exceptions",
+      "col": 1,
+      "type": "security",
+      "icon": "waiting",
+      "label": "Cảnh Báo Lệch Định Mức",
+      "sublabel": "Badge Vàng (>=15%), Badge Đỏ (>=30%)",
+      "tag": "QUOTA_WARNING",
+      "width": 190
+    },
+    {
+      "id": "matrix_review",
+      "lane": "supply",
+      "col": 2,
+      "type": "backend",
+      "icon": "briefcase",
+      "label": "Rà Soát Ma Trận 18x8",
+      "sublabel": "Xem toàn công ty, inline-edit số duyệt",
+      "tag": "MATRIX_VIEW",
+      "width": 190
+    },
+    {
+      "id": "hard_lock",
+      "lane": "exceptions",
+      "col": 2,
+      "type": "security",
+      "icon": "stop",
+      "label": "Khóa Sổ Cứng (Hard-Lock)",
+      "sublabel": "Chặn tuyệt đối 8 tòa nộp lại/sửa đổi",
+      "tag": "CUTOFF_LOCK",
+      "width": 190
+    },
+    {
+      "id": "bod_sign",
+      "lane": "leadership",
+      "col": 3,
+      "type": "security",
+      "icon": "flag",
+      "label": "BOD Ký Số Phê Duyệt",
+      "sublabel": "Tab 3: Ký duyệt dự toán gộp 8 tòa",
+      "tag": "SIGNATURE_BADGE",
+      "width": 190
+    },
+    {
+      "id": "bod_return",
+      "lane": "exceptions",
+      "col": 3,
+      "type": "external",
+      "icon": "failure",
+      "label": "BOD Yêu Cầu Chỉnh Sửa",
+      "sublabel": "Trả về Tab 2 để Cung ứng sửa số lượng",
+      "tag": "REJECTED_COST",
+      "width": 190
+    },
+    {
+      "id": "vtth_order",
+      "lane": "supply",
+      "col": 4,
+      "type": "cloud",
+      "icon": "external",
+      "label": "Đặt Hàng Nhà Cung Cấp",
+      "sublabel": "Phát hành đơn hàng, thuế VAT 8%",
+      "tag": "ORDERING",
+      "width": 190
+    },
+    {
+      "id": "direct_delivery",
+      "lane": "sites",
+      "col": 4,
+      "type": "messagebus",
+      "icon": "start",
+      "label": "NCC Giao Thẳng Tới 8 Tòa",
+      "sublabel": "Không qua kho tổng / Vận chuyển tận nơi",
+      "tag": "DIRECT_DELIVERY",
+      "width": 190
+    },
+    {
+      "id": "site_receive",
+      "lane": "sites",
+      "col": 5,
+      "type": "frontend",
+      "icon": "success",
+      "label": "Nghiệm Thu & Thẻ Kho Tòa",
+      "sublabel": "Tab 4: Ký nhận, tăng thẻ kho cơ sở",
+      "tag": "DISPATCH_SITE",
+      "width": 190
+    },
+    {
+      "id": "inv_multi",
+      "lane": "supply",
+      "col": 5,
+      "type": "database",
+      "icon": "database",
+      "label": "Gộp Hóa Đơn VAT 8%",
+      "sublabel": "1 HĐ gộp nhiều tòa, lưu Lark Drive",
+      "tag": "INVOICE_BUNDLE",
+      "width": 190
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_vtth_submit",
+      "from": "vtth_submit",
+      "to": "quota_calc",
+      "label": "Kiểm tra định mức",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_quota_warn",
+      "from": "quota_calc",
+      "to": "quota_warn",
+      "label": "Lệch vượt ngưỡng",
+      "variant": "security",
+      "role": "branch"
+    },
+    {
+      "id": "e_quota_matrix",
+      "from": "quota_calc",
+      "to": "matrix_review",
+      "label": "Dữ liệu ma trận",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_lock_trigger",
+      "from": "matrix_review",
+      "to": "hard_lock",
+      "label": "Chốt rà soát",
+      "variant": "security",
+      "role": "branch"
+    },
+    {
+      "id": "e_matrix_bod",
+      "from": "matrix_review",
+      "to": "bod_sign",
+      "label": "Trình ký duyệt Tab 3",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_bod_reject",
+      "from": "bod_sign",
+      "to": "bod_return",
+      "label": "Từ chối / Yêu cầu sửa",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_bod_back",
+      "from": "bod_return",
+      "to": "matrix_review",
+      "label": "Mở khóa sửa lại Tab 2",
+      "variant": "dashed",
+      "role": "return"
+    },
+    {
+      "id": "e_bod_order",
+      "from": "bod_sign",
+      "to": "vtth_order",
+      "label": "Ký số phê duyệt",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_order_direct",
+      "from": "vtth_order",
+      "to": "direct_delivery",
+      "label": "Giao thẳng cơ sở",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_site_receive",
+      "from": "direct_delivery",
+      "to": "site_receive",
+      "label": "Bàn giao nhập kho tòa",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "e_inv_multi",
+      "from": "site_receive",
+      "to": "inv_multi",
+      "label": "Đối soát HĐ VAT 8%",
+      "variant": "default",
+      "role": "async"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Danh Mục Chuẩn Hóa 18 Mặt Hàng",
+      "items": [
+        "Cố định danh mục vật tư tiêu hao thiết yếu trên 8 tòa nhà",
+        "Tự động tính trung bình xuất (X_T-1, X_T-2) và đặt (Đ_T-1, Đ_T-2)",
+        "Gắn badge cảnh báo tự động: Vàng (>=15%), Đỏ (>=30%)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Quy Tắc Khóa Sổ Cứng (Hard-Lock)",
+      "items": [
+        "Khi Cung ứng chốt rà soát, toàn bộ 8 tòa bị khóa cứng",
+        "Chặn tuyệt đối việc nộp lại hoặc sửa đề xuất để bảo vệ dự toán",
+        "Chỉ mở khóa khi Ban Giám đốc bấm Từ chối / Yêu cầu chỉnh sửa"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Kho Phân Tán & Giao Thẳng Cơ Sở",
+      "items": [
+        "Không qua kho tổng: Nhà cung cấp giao hàng thẳng tới 8 tòa",
+        "Tòa nhà nhận hàng và ghi nhận trực tiếp vào thẻ kho cơ sở (Tab 4)",
+        "Thuế suất 8%, hỗ trợ gộp nhiều tòa vào 1 hóa đơn VAT"
+      ]
+    }
+  ]
+}
